@@ -103,24 +103,45 @@ const FEATURES: &[Feature] = &[
 
 // ── Usage analysis ───────────────────────────────────────────────────────────
 
+/// Returns true if a lowercased text line uses a trigger (starts with it, or
+/// contains it on a new line within multi-line input).
+fn line_matches_trigger(lower: &str, trigger: &str) -> bool {
+    if lower.starts_with(trigger) {
+        return true;
+    }
+    // Check for the trigger after a newline without allocating a formatted string.
+    let mut search = lower;
+    while let Some(pos) = search.find('\n') {
+        let rest = &search[pos + 1..];
+        if rest.starts_with(trigger) {
+            return true;
+        }
+        search = rest;
+    }
+    false
+}
+
 /// Counts how many sessions contain at least one user message starting with
 /// each trigger string.
 fn count_feature_use(sessions: &[crate::tui::session_picker::SessionInfo]) -> Vec<usize> {
     let mut counts = vec![0usize; FEATURES.len()];
     for session in sessions {
+        // Per-session found flags — increment the global count at most once per session.
+        let mut found_in_session = vec![false; FEATURES.len()];
+
         for msg in &session.messages_preview {
             if msg.role != "user" {
                 continue;
             }
             let lower = msg.content.to_lowercase();
             for (i, feature) in FEATURES.iter().enumerate() {
-                if counts[i] == 0
+                if !found_in_session[i]
                     && feature
                         .triggers
                         .iter()
-                        .any(|&t| lower.starts_with(t) || lower.contains(&format!("\n{t}")))
+                        .any(|&t| line_matches_trigger(&lower, t))
                 {
-                    counts[i] += 1;
+                    found_in_session[i] = true;
                 }
             }
         }
@@ -128,14 +149,20 @@ fn count_feature_use(sessions: &[crate::tui::session_picker::SessionInfo]) -> Ve
         if let Some(ref prompt) = session.first_user_prompt {
             let lower = prompt.to_lowercase();
             for (i, feature) in FEATURES.iter().enumerate() {
-                if counts[i] == 0
+                if !found_in_session[i]
                     && feature
                         .triggers
                         .iter()
                         .any(|&t| lower.starts_with(t))
                 {
-                    counts[i] += 1;
+                    found_in_session[i] = true;
                 }
+            }
+        }
+
+        for (i, found) in found_in_session.iter().enumerate() {
+            if *found {
+                counts[i] += 1;
             }
         }
     }
