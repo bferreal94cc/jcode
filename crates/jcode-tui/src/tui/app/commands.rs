@@ -21,6 +21,7 @@ pub(super) use super::commands_review::{
     maybe_trigger_autoreview_local, preferred_one_shot_review_override,
     prepare_review_spawned_session, queue_review_spawn_remote, reset_current_session,
 };
+pub(super) use super::chronicle::handle_chronicle_command;
 pub(super) use super::todos_view::handle_todos_view_command;
 use super::{App, DisplayMessage, LocalRewindUndoSnapshot, ProcessingStatus};
 use crate::bus::{Bus, BusEvent, GitStatusCompleted, ManualToolCompleted, ToolEvent, ToolStatus};

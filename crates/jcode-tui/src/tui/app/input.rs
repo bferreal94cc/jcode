@@ -3575,6 +3575,7 @@ impl App {
             || super::commands::handle_telemetry_command(self, trimmed)
             || super::support::handle_support_command(self, trimmed)
             || super::state_ui::handle_info_command(self, trimmed)
+            || super::commands::handle_chronicle_command(self, trimmed)
             || super::auth::handle_auth_command(self, trimmed)
             || super::tui_lifecycle_runtime::handle_dev_command(self, trimmed);
         if handled {

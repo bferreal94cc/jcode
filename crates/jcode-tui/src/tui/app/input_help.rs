@@ -169,6 +169,9 @@ impl App {
             }
             "version" => "/version\nShow jcode version/build details.",
             "changelog" => "/changelog\nShow recent changes embedded in this build.",
+            "chronicle" | "chronicle tips" => {
+                "/chronicle tips\nScans your recent session history, identifies commands and features you haven't tried, and shows personalised tips.\n\n/chronicle\nAlias for /chronicle tips."
+            }
             "quit" => "/quit\nExit jcode.",
             "config" => {
                 "/config\nShow active configuration.\n\n/config init\nCreate default config file.\n\n/config edit\nOpen config in $EDITOR."
